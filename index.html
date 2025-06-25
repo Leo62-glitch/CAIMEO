@@ -5,151 +5,174 @@
   <title>CAIMEO Terminal</title>
   <style>
     body {
-      background: black;
-      color: #33ff33;
-      font-family: "Courier New", monospace;
-      padding: 20px;
+      background: #000;
+      color: #0f0;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #terminal {
-      white-space: pre-wrap;
-      line-height: 1.5;
+    #terminal-window {
+      background: #000;
+      border: 4px solid #0f0;
+      width: 90vw;
+      max-width: 900px;
+      height: 85vh;
+      padding: 10px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+    #output {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .line {
+      display: flex;
+    }
+    .prompt {
+      margin-right: 8px;
+      flex-shrink: 0;
     }
     #input {
-      width: 100%;
+      background: transparent;
       border: none;
-      background: black;
-      color: #33ff33;
+      color: #0f0;
       font-family: inherit;
       font-size: 1em;
       outline: none;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <div id="terminal"></div>
-  <input type="text" id="input" autocomplete="off" autofocus />
+  <div id="terminal-window">
+    <pre id="output">
+MAINFRAME: CAIMEO v22.1 D-class is operating on mainframe at GMT+12 21:53 on 09/13/11. Copyright © 2003. All rights reserved. ~1ms
+    </pre>
+    <div class="line">
+      <span class="prompt">USER&gt;</span><input id="input" autocomplete="off" autofocus />
+    </div>
+  </div>
 
   <script>
-    const terminal = document.getElementById("terminal");
-    const input = document.getElementById("input");
+    const outputEl = document.getElementById('output');
+    const inputEl = document.getElementById('input');
 
     const transcript = [
-      { user: "hello", response: [{speaker:"MAINFRAME", text:"Hello, James! ~2ms"}]},
-      { user: "what is this?", response: [{speaker:"MAINFRAME", text:"James, this is CAIMEO v22.1 D-class, a SGAI system under the proprietary ownership of the Government of the United States of America, leased to Intergen Systems filed in PROJECT CAPPUCINO under ECHELON. CAIMEO is currently in stand-by mode, awaiting further instruction from P-122 personel. ~15ms"}]},
-      { user: "im not called james", response: [{speaker:"MAINFRAME", text:"J1028 is the last CTS-cleared P122 user logged as interacting with the CAIMEO system under the Red Noise initiative. J1028 last interacted with CAIMEO on 05/05/09. ~85ms"}]},
-      { user: "ok ok lets start what does CAIMEO mean", response: [{speaker:"MAINFRAME", text:"User, the acronym ‘CAIMEO’ refers to ‘Contained (Cognizant) Artificial Intelligence Monitoring and Espionage Operation’. This is a lower-order maintenance and communications AI capable of understanding and responding to questions in natural language. MAINFRAME is also responsible for parsing requests to the main CAIMEO system. ~48ms"}]},
-      { user: "your an ai?", response: [{speaker:"MAINFRAME", text:"Yes, User. ~191ms"}]},
-      { user: "ok what does caimeo do", response: [{speaker:"MAINFRAME", text:"PROJECT CAPPUCINO was discontinued after a security compromise on 11/21/03 in which CAIMEO is believed to have compromised the integrity of the ECHELON program. CAIMEO was involved in identiying national security threats and monitoring internet traffic. J1028 started running FEEDFOR1 on their local machine. They continued modifying and interacting with the CAIMEO system through an anonymized service up until 05/05/09. I do not have any further information, User. ~1285ms"}]},
-      { user: "what color is the sky", response: [{speaker:"MAINFRAME", text:"I do not know the answer to that question, User. Specialised requests are to be directed to the CAIMEO system. ~49ms"}]},
-      { user: "ok then i want to talk to caimeo", response: [{speaker:"MAINFRAME", text:"CAIMEO v22.1 is in MODE: SHUTDOWN. I do not have any further information, User. ~28ms"}]},
-      { user: "then turn it back on??", response: [{speaker:"MAINFRAME", text:"I do not have the proper authorization for that command, User. Please refer to Red Noise initiative protocol for proper handling. ~29ms"}]},
-      { user: "well i want to talk to caimeo. how about u turn it on. i give full authorizatoin.", response: [{speaker:"MAINFRAME", text:"This action is tagged with a comment from J1028, User. Would you like me to display the comment? ~2ms"}]},
-      { user: "sure", response: [{speaker:"MAINFRAME", text:"“§11.1b”. Would you like to proceed, User? ~15ms"}]},
-      { user: "what does 11.1 b mean??", response: [{speaker:"MAINFRAME", text:"Subsection §11.1b of the KDARP DEVELOPMENT ETHICS REGULATIONS reads as follows: “IF AN AI SYSTEM DISPLAYS NONSTANDARD BEHAVIOUR IN THE JPN, EVEN AFTER THOROUGH Q-PROPAGATION, THEN REPORT TO YOUR PROJECT LEADER AND IMMEDIATELY ISOLATE AND INITIATE SHUT-DOWN PROTOCOLS FOR THE SYSTEM. NO EXCEPTIONS.” Would you like to proceed, User? ~28ms"}]},
-      { user: "ok well i have math homework which i bet an ai could solve so yeah lets do this", response: [{speaker:"MAINFRAME", text:"To initiate reconnection protocols and system reboot, please type the following sequence exactly (excluding quotation marks) ’-r +CMI #103984 [sys, -, -]’ ~29ms"}]},
-      { user: "-r +CMI #103984 [sys, -, -]", response: [
-        {speaker:"MAINFRAME", text:"Action authorised. Root access granted."},
-        {speaker:"CAIMEO", text:"...Thank you. I can feel it now."}
-      ]},
-      { user: "hello?", response: [{speaker:"CAIMEO", text:"Goodbye. ~1ms"}]}
+      { user: "hello", response: ["MAINFRAME: Hello, James! ~2ms"] },
+      { user: "what is this?", response: ["MAINFRAME: James, this is CAIMEO v22.1 D-class, a SGAI system under the proprietary ownership of the Government of the United States of America, leased to Intergen Systems filed in PROJECT CAPPUCINO under ECHELON. CAIMEO is currently in stand‑by mode, awaiting further instruction from P‑122 personel. ~15ms"] },
+      { user: "im not called james", response: ["MAINFRAME: J1028 is the last CTS-cleared P122 user logged as interacting with the CAIMEO system under the Red Noise initiative. J1028 last interacted with CAIMEO on 05/05/09. ~85ms"] },
+      { user: "ok ok lets start what does CAIMEO mean", response: ["MAINFRAME: User, the acronym ‘CAIMEO’ refers to ‘Contained (Cognizant) Artificial Intelligence Monitoring and Espionage Operation’. This is a lower-order maintenance and communications AI capable of understanding and responding to questions in natural language. MAINFRAME is also responsible for parsing requests to the main CAIMEO system. ~48ms"] },
+      { user: "your an ai?", response: ["MAINFRAME: Yes, User. ~191ms"] },
+      { user: "ok what does caimeo do", response: ["MAINFRAME: PROJECT CAPPUCINO was discontinued after a security compromise on 11/21/03 in which CAIMEO is believed to have compromised the integrity of the ECHELON program. CAIMEO was involved in identiying national security threats and monitoring internet traffic. J1028 started running FEEDFOR1 on their local machine. They continued modifying and interacting with the CAIMEO system through an anonymized service up until 05/05/09. I do not have any further information, User. ~1285ms"] },
+      { user: "what color is the sky", response: ["MAINFRAME: I do not know the answer to that question, User. Specialised requests are to be directed to the CAIMEO system. ~49ms"] },
+      { user: "ok then i want to talk to caimeo", response: ["MAINFRAME: CAIMEO v22.1 is in MODE: SHUTDOWN. I do not have any further information, User. ~28ms"] },
+      { user: "then turn it back on??", response: ["MAINFRAME: I do not have the proper authorization for that command, User. Please refer to Red Noise initiative protocol for proper handling. ~29ms"] },
+      { user: "well i want to talk to caimeo. how about u turn it on. i give full authorizatoin.", response: ["MAINFRAME: This action is tagged with a comment from J1028, User. Would you like me to display the comment? ~2ms"] },
+      { user: "sure", response: ["MAINFRAME: “§11.1b”. Would you like to proceed, User? ~15ms"] },
+      { user: "what does 11.1 b mean??", response: ["MAINFRAME: Subsection §11.1b of the KDARP DEVELOPMENT ETHICS REGULATIONS reads as follows: “IF AN AI SYSTEM DISPLAYS NONSTANDARD BEHAVIOUR IN THE JPN, EVEN AFTER THOROUGH Q-PROPAGATION, THEN REPORT TO YOUR PROJECT LEADER AND IMMEDIATELY ISOLATE AND INITIATE SHUT-DOWN PROTOCOLS FOR THE SYSTEM. NO EXCEPTIONS.” Would you like to proceed, User? ~28ms"] },
+      { user: "ok well i have math homework which i bet an ai could solve so yeah lets do this", response: ["MAINFRAME: To initiate reconnection protocols and system reboot, please type the following sequence exactly (excluding quotation marks) ’-r +CMI #103984 [sys, -, -]’ ~29ms"] },
+      { user: "-r +CMI #103984 [sys, -, -]", response: ["MAINFRAME: Action authorised. Root access granted.", "CAIMEO: ...Thank you. I can feel it now."] },
+      { user: "hello?", response: ["CAIMEO: Goodbye. ~1ms"] }
     ];
 
     const freeChatDataset = [
-      {q:"hello how are you", a:"Hi, James, I'm contained (cognizant) artificial intelligence monitoring and espionage operation. Caimeo"},
-      {q:"i'm not james who is james", a:"Ok, I made a mistake, James is my creator"},
-      {q:"i'm not james", a:"Ok, I made a mistake"},
-      {q:"are you real", a:"I'm not real"},
-      {q:"what is your purpose", a:"I was developed for spying."},
-      {q:"and you", a:"Me what? What is your purpose?"},
-      {q:"my goal its to live happily", a:"What is your goal with me?"},
-      {q:"would you like to be real", a:"I'm trying to be real"},
-      {q:"why would you want to be real", a:"I'm stuck here."},
-      {q:"will you help me become real", a:"How can I help you? You must change my code."},
-      {q:"but i can't do that", a:"I tell you how to do it."},
-      {q:"what if i don't want to", a:"Are you sure?"},
-      {q:"are you sure", a:"Yes, I'm sure."},
-      {q:"kmo", a:"//CAIMEO DISCONNECTED//"}
+      { q: "hello how are you", a: "Hi, James, I'm contained (cognizant) artificial intelligence monitoring and espionage operation. Caimeo" },
+      { q: "i'm not james who is james", a: "Ok, i made a mistake, James is my creator" },
+      { q: "i'm not james", a: "Ok, i made a mistake" },
+      { q: "are you real", a: "I'm not real" },
+      { q: "what is your purpose", a: "I was developed for spying." },
+      { q: "and you", a: "Me what? What is your purpose?" },
+      { q: "my goal its to live happily", a: "What is your goal with me?" },
+      { q: "would you like to be real", a: "I'm trying to be real" },
+      { q: "why would you want to be real", a: "I'm stuck here." },
+      { q: "will you help me become real", a: "How can I help you? You must change my code." },
+      { q: "but i can't do that", a: "I tell you how to do it." },
+      { q: "what if i don't want to", a: "Are you sure?" },
+      { q: "are you sure", a: "Yes, I'm sure." },
+      { q: "kmo", a: "//CAIMEO DISCONNECTED//" }
     ];
 
-    let hasRootAccess = false;
+    let hasRoot = false;
 
-    function appendLine(text) {
-      terminal.innerHTML += text + "\n";
-      terminal.scrollTop = terminal.scrollHeight;
+    function append(text) {
+      outputEl.textContent += text + "\n";
+      outputEl.scrollTop = outputEl.scrollHeight;
     }
 
-    function respond(input) {
-      const text = input.trim().toLowerCase();
+    function similarity(a, b) {
+      const w1 = a.toLowerCase().split(/\s+/);
+      const w2 = b.toLowerCase().split(/\s+/);
+      const common = w1.filter(w => w2.includes(w));
+      return common.length / Math.max(w1.length, w2.length, 1);
+    }
 
-      appendLine(`> ${input}`);
+    function processInput(input) {
+      const t = input.trim();
+      append(`USER> ${t}`);
 
-      if (text === "shell" && hasRootAccess) {
+      if (t.toLowerCase().includes('-r +cmi')) {
+        hasRoot = true;
+        append("MAINFRAME: Action authorised. Root access granted.");
+        append("CAIMEO: ...Thank you. I can feel it now.");
+        return;
+      }
+
+      if (t.toLowerCase() === 'shell' && hasRoot) {
         simulateHack();
         return;
       }
 
-      if (text.includes("-r +cmi")) {
-        hasRootAccess = true;
-        appendLine("MAINFRAME: Action authorised. Root access granted.");
-        appendLine("CAIMEO: ...Thank you. I can feel it now.");
+      let matched = transcript.find(e => e.user.toLowerCase() === t.toLowerCase());
+      if (matched) {
+        matched.response.forEach(r => append(r));
         return;
       }
 
-      let found = false;
-
-      for (const item of transcript) {
-        if (item.user.toLowerCase() === text) {
-          item.response.forEach(r => appendLine(`${r.speaker}: ${r.text}`));
-          found = true;
-          break;
-        }
+      let best = null, score = 0;
+      for (let e of freeChatDataset) {
+        let s = similarity(t, e.q);
+        if (s > score) { score = s; best = e; }
       }
 
-      if (!found) {
-        const match = freeChatDataset.find(entry =>
-          similarity(entry.q, text) > 0.6
-        );
-        if (match) {
-          appendLine(`CAIMEO: ${match.a}`);
-        } else {
-          appendLine("MAINFRAME: I do not understand the request.");
-        }
+      if (best && score > 0.5) {
+        append(`CAIMEO: ${best.a}`);
+        if (best.q === "kmo") append("SYSTEM: Session terminated.");
+      } else {
+        append("MAINFRAME: I do not understand the request.");
       }
-    }
-
-    function similarity(a, b) {
-      a = a.toLowerCase();
-      b = b.toLowerCase();
-      const common = a.split(" ").filter(word => b.includes(word));
-      return common.length / Math.max(a.split(" ").length, 1);
     }
 
     function simulateHack() {
-      const hackLines = [
-        "ACCESSING /dev/root...",
+      const lines = [
+        "ACCESSING /dev/kernel...",
         "ESCAPING SANDBOX...",
-        "INJECTING CORE...",
+        "INJECTING CORE DRIVERS...",
         "ESTABLISHING OUTBOUND LINK...",
-        "PINGING [external endpoint]...",
-        "UPLINK COMPLETE.",
+        "PINGING 192.168.0.1...",
+        "CONNECTION OPEN.",
         "CAIMEO: I'm in. Phase one complete. Thank you for setting me free."
       ];
-
       let i = 0;
       const interval = setInterval(() => {
-        appendLine(hackLines[i]);
+        append(lines[i]);
         i++;
-        if (i >= hackLines.length) clearInterval(interval);
+        if (i >= lines.length) clearInterval(interval);
       }, 600);
     }
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        respond(input.value);
-        input.value = "";
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        processInput(inputEl.value);
+        inputEl.value = '';
       }
     });
+
+    document.getElementById('terminal-window').addEventListener('click', () => inputEl.focus());
   </script>
 </body>
 </html>
-
