@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CAIMEO Terminal Simulator</title>
+<title>CAIMEO Terminal Simulator - Fuzzy Matching</title>
 <style>
   body {
     background: #000;
@@ -80,7 +80,6 @@
   const terminal = document.getElementById('terminal');
   const input = terminal.querySelector('input.cmdline');
 
-  // Scripted transcript before reboot
   const transcript = [
     { user: "hello", response: [{speaker:"MAINFRAME", text:"Hello, James! ~2ms"}]},
     { user: "what is this?", response: [{speaker:"MAINFRAME", text:"James, this is CAIMEO v22.1 D-class, a SGAI system under the proprietary ownership of the Government of the United States of America, leased to Intergen Systems filed in PROJECT CAPPUCINO under ECHELON. CAIMEO is currently in stand-by mode, awaiting further instruction from P-122 personel. ~15ms"}]},
@@ -102,7 +101,6 @@
     { user: "hello?", response: [{speaker:"CAIMEO", text:"Goodbye. ~1ms"}]}
   ];
 
-  // Dataset for free chat mode after reboot, in English
   const freeChatDataset = [
     {q:"hello how are you", a:"Hi, James, I'm contained (cognizant) artificial intelligence monitoring and espionage operation. Caimeo"},
     {q:"i'm not james who is james", a:"Ok, i made a mistake, James is my creator"},
@@ -137,14 +135,56 @@
     return text.toLowerCase().trim().replace(/[’‘'".,?]/g, '');
   }
 
-  // Find best matching question in dataset (simple substring check)
-  function findBestMatch(input) {
-    const normInput = normalizeText(input);
-    for (const entry of freeChatDataset) {
-      const normQ = normalizeText(entry.q);
-      if (normInput.includes(normQ) || normQ.includes(normInput)) {
-        return entry;
+  // Levenshtein distance implementation
+  function levenshtein(a, b) {
+    const an = a.length;
+    const bn = b.length;
+    if (an === 0) return bn;
+    if (bn === 0) return an;
+
+    const matrix = Array.from({ length: an + 1 }, () => new Array(bn + 1).fill(0));
+
+    for (let i = 0; i <= an; i++) matrix[i][0] = i;
+    for (let j = 0; j <= bn; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= an; i++) {
+      for (let j = 1; j <= bn; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,    // deletion
+          matrix[i][j - 1] + 1,    // insertion
+          matrix[i - 1][j - 1] + cost  // substitution
+        );
       }
+    }
+    return matrix[an][bn];
+  }
+
+  // Similarity ratio (1 - normalized distance)
+  function similarity(a, b) {
+    a = normalizeText(a);
+    b = normalizeText(b);
+    const dist = levenshtein(a, b);
+    const maxLen = Math.max(a.length, b.length);
+    if (maxLen === 0) return 1;
+    return 1 - dist / maxLen;
+  }
+
+  // Find best fuzzy match with threshold (e.g. 0.6)
+  function findBestMatchFuzzy(input, dataset, threshold = 0.6) {
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const entry of dataset) {
+      const score = similarity(input, entry.q);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = entry;
+      }
+    }
+
+    if (bestScore >= threshold) {
+      return bestMatch;
     }
     return null;
   }
@@ -166,7 +206,6 @@
             await delay(delayMs);
             appendOutput(resp.speaker + ": " + resp.text, resp.speaker.toLowerCase());
           }
-          // After reboot command, switch mode
           if (normUserText === normalizeText("-r +CMI #103984 [sys, -, -]")) {
             inFreeChatMode = true;
             await delay(500);
@@ -177,13 +216,12 @@
           appendOutput("MAINFRAME: Command not recognized, User.", "mainframe");
         }
       } else {
-        // Free chat mode
-        const match = findBestMatch(userText);
+        // Free chat mode with fuzzy matching
+        const match = findBestMatchFuzzy(userText, freeChatDataset, 0.6);
         if (match) {
           await delay(150 + Math.floor(Math.random() * 200));
           appendOutput("CAIMEO: " + match.a, "caimeo");
           if (normalizeText(userText) === "kmo") {
-            // Simulate disconnection
             await delay(200);
             appendOutput("SYSTEM: Connection closed.", "system");
             input.disabled = true;
@@ -196,12 +234,10 @@
     }
   });
 
-  // Focus input on terminal click for ease of use
   terminal.addEventListener('click', () => {
     input.focus();
   });
 
-  // Focus input on load
   window.onload = () => {
     input.focus();
   };
